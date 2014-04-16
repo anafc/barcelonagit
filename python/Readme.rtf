@@ -1,0 +1,68 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
+{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red36\green43\blue51;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720
+
+\f0\fs22 \cf2 0) Match-VALEN-BARCA_positions.csv es el csv generado con el python de Javi\
+\
+El fichero de Javi esta desplazado las X y las Y, las toque a mano para poner bien y con eso genere los ficheros\
+================\
+1) Match-VALEN-BARCA_positions_comas.csv y Match-VALEN-BARCA_positions_copia.\
+(Creo que es el mismo fichero, lo \'fanico que uno esta en formato excel ya que primero lo formate en excel y luego lo cambie a csv para leerlo en Python\
+\
+=====\
+2)Agrupo los puntos del mismo jugador periodo, x e y, que pertenecen al mismo minuto, en una \'fanica linea sumado las intensidades.\
+Para eso convierto los segundos del fichero csv de entrada a minutos\
+Poner el fichero la salida de la etapa 1 en un directorio data\
+\
+Ejecutar\
+dumbo start frecuencias.py -input data/*  -output macthOut.csv -overwrite yes\
+\
+Quitar las ' intermedias\
+# sed 's/'\\''/ /g' macthOut.csv > macthOut2.csv\
+#sed 's/ //g' macthOut2.csv > macthOut3.csv\
+#sed 's/ /  /g' macthOut3.csv > macthOut4.csv\
+\
+Renombrar el fichero  macthOut4.csv a  MacthOut.csv\
+\
+=======\
+3) Crear el cluster . Usando como entrada el fichero MactOut.cvs de la fase anterior genero el fichero MatchOut2cent.csv\
+Se ejecuta el scritp nkmeans.\
+Lo que hace es que dardo un arras de centroid, busca cual es el centroide  al que esta m\'e1s pr\'f3ximo cada punto\
+\
+============================\
+4) Agrupo los punto que pertenecen al mismo centroide, en una \'fanica linea sumado las intensidad\
+Poner el fichero la salida de la etapa 3 en un directorio data\
+\
+Ejecutar\
+dumbo start frecuenciasCluster.py -input data/*  -output macthOutAgrupClust.csv -overwrite yes\
+\
+Quitar las ' intermedias\
+# sed 's/'\\''/ /g' macthOutAgrupClust.csv > macthOutAgrupClust2.csv\
+#sed 's/ //g' macthOutAgrupClust2.csv > macthOutAgrupClust3.csv\
+#sed 's/ /  /g' macthOutAgrupClust3.csv > macthOutAgrupClust4.csv\
+\
+\
+Renombrar el fichero macthOutAgrupClust4.csv a macthOutAgrupClust.csv\
+\
+cambiar en el fichero macthOutAgrupClust.csv\
+la cabecera \
+0Period,NumPlayer,NamePlayer,Minute,x,y,Intesity\
+\
+por\
+Period,NumPlayer,NamePlayer,Minute,x,y,Intesity\
+\
+sino el html no funciona\
+\
+\
+\
+============\
+5) Html\
+Copiar el fichero macthOutAgrupClust.csv a la carpeta del HMTL\
+ejecutar python -m SimpleHTTPServer\
+abrir ../html/pruebaBarcelona%20Clusterhtml.html\
+\
+\
+}

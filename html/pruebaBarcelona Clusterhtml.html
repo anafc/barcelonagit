@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="http://d3js.org/d3.hexbin.v0.min.js?5c6e4f0"></script>
+  <script src="jquery-1.10.2.js"></script>
+<script>
+$(function() {
+$( "#check" ).button();
+$( "#format" ).buttonset();
+});
+</script>
+
+
+</head>
+
+<style>
+/************EJES****************/
+/*texto de los ejes poner a 0 para quitarlos*/
+.axis text {
+  font: 0px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+#format { margin-top: 2em; }
+.hexagon {
+  fill: none;
+  stroke: #000;
+  stroke-width: .5px;
+}
+.chart {
+
+}
+
+ option{
+                width: 100px;
+                white-space: wrap;
+            }
+body {
+  font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+  font-size: 62.5%;
+}
+</style>
+
+
+
+<table>
+<tr><td><b>Period: </b><input id="period1" checked="" type="checkbox"/> 1 <input id="period2" type="checkbox"/> 2</td>
+
+  <td><b>Minute Start:</b> <select id="minute"><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><<option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td>
+
+  <td><b>Offset:</b> <select id="offset"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><<option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option selected>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td>
+<td>
+<input class="butts" type="button" value="refresh" onclick="reloadData()"/>
+</td>
+</tr><tr>
+<td>
+<b>Balon</b><input id="balon" type="checkbox" checked=""/></td>
+ <td><b>Valencia: </b> <select id="equipo1-" multiple="multiple" size="5">
+  <option selected value="None">None</option>
+  <option value="1">Guaita</option>
+<option value="2">Victor Ruiz</option>
+<option value="3">Rami-Adil</option>
+<option value="4">Jordi Alba</option>
+<option value="5">Miguel</option>
+<option value="6">Banega</option>
+<option value="7">Albelda-David</option>
+<option value="8">Canales-Sergio</option>
+<option value="9">Mathieu-Jeremy</option>
+<option value="10">Pablo Hernandez</option>
+<option value="11">Soldado-Roberto</option>
+<option value="12">Tino Costa</option>
+<option value="13">Jonas</option>
+<option value="14">Piatti-Pablo</option>
+<option value="15">Bruno</option>
+<option value="16">Aduriz-Aritz</option>
+<option value="17">Maduro-Hedwiges</option>
+<option value="18">Diego Alves</option></select></td>
+  <td><b>FC Barcelona: </b> <select id="equipo2-" multiple="multiple" size="5"><option selected value="None">None</option>
+ <option value="24">Victor Valdes</option>
+<option value="25">Puyol-Carles</option>
+<option value="26">Mascherano-Javier</option>
+<option value="27">Abidal-Eric</option>
+<option value="28">Dani Alves</option>
+<option value="29">Busquets-Sergio</option>
+<option value="30">Keita</option>
+<option value="31">Xavi</option>
+<option value="32">Fabregas-Cesc</option>
+<option value="33">Messi</option>
+<option value="34">Pedro</option>
+<option value="35">David Villa</option>
+<option value="36">Adriano</option>
+<option value="37">Thiago Alcantara</option>
+<option value="38">Pinto</option>
+<option value="39">Maxwell</option>
+<option value="40">Afellay-Ibrahim</option>
+<option value="41">Fonts</option></td></select>
+  </td>
+</tr>
+</table>
+<div id="chart"></div>
+<canvas id="miCanvas" width="800" height="600" ></canvas>
+<script>
+
+
+
+var chartHeight = 600;
+var chartWidth = 800;
+var radio=10;
+
+var svg = d3.select("#chart").append("svg")
+  .attr("height", chartHeight+100)
+  .attr("width", chartWidth+100)
+  .append("g")
+    .attr("transform", "translate(10,10)");
+
+
+//973618-1024135
+var x = d3.scale.linear()
+  .range([0, chartWidth])
+  .domain([-600,600]);
+
+//147650-208407
+var y = d3.scale.linear()
+  .domain([-400, 400])
+  .range([chartHeight, 0]);
+
+var minscale=0;
+var maxscale=1;
+
+
+var color = d3.scale.linear()
+    .domain([minscale, maxscale])
+    .range(["white","red"])
+    .interpolate(d3.interpolateLab);
+
+var hexbin;
+//cabecera
+//Period,NumPlayer,NamePlayer,Minute,X,Y,Intesity
+
+var averageFunction = function(d,maxim,imp)
+{
+   //console.log("average2"+imp);
+    var sum = 0;
+    for(var i = 0; i < d.length; i++){
+        sum += + d[i].Intesity;
+        if (imp)
+          console.log("i:"+i+" x:"+d[i].x+" y:"+d[i].y+" Inten:"+d[i].Intesity+" sum: "+sum);
+    }
+
+    valor=sum/maxim; //lo normalizamos a un valor entre 0 y 1
+    valorfin=valor*(maxscale-minscale)+minscale
+    if (imp)
+      console.log("AVF:"+d.x + "," + d.y+ ",max:" + maxim+",sum:" + sum+",Int"+valorfin);
+    //console.log(d)
+    return valorfin;
+};
+
+var max=0;
+function intensityFunction(d, index, array)
+{
+
+    var sum = 0;
+    for(var i = 0; i < d.length; i++){
+        sum += + d[i].Intesity;
+         //console.log("i:"+i+" x:"+d[i].x+" y:"+d[i].y+" Inten:"+d[i].Intesity+" sum: "+sum)
+    }
+
+    //console.log("a[" + index + "] = " +sum);
+    //console.log(d)
+    if (index==0)
+      max=sum;
+
+    if(max<sum)
+      max=sum
+
+   //console.log("INF:"+d.x + "," + d.y+ ",max:" + max);
+};
+
+var opacity = d3.scale.linear().domain([minscale, maxscale]).range([minscale, maxscale]);
+var dataTotal=null;
+
+var filtrarData= function(row,Period,MinuteIni,Offset,NumPlayer)
+{
+
+    t0=MinuteIni;
+    t1=(t0+Offset);
+
+
+    result= jQuery.inArray(row['Period'], Period)!=-1 && jQuery.inArray(row['NumPlayer'], NumPlayer)!=-1
+      && row['Minute'] < t1.toString() && row['Minute'] >= t0.toString();
+
+
+        return result;
+};
+
+var minIni=0, offsetIni=45,playerIni=['0'],periodIni=['1'];
+
+
+d3.csv("macthOutAgrupClust.csv",function(data)
+{  //bk-xybuild-nomissing
+  console.log("load csv");
+  dataTotal=data;
+  console.log("P:"+periodIni+" pl:"+playerIni+" MinIni:"+minIni+" Offset:"+offsetIni)
+  datosvacios=data.filter(function(row){
+    return filtrarData(row,['3'],0,0,['89']);});
+  datafiltrados = data.filter(function(row){
+    return filtrarData(row,periodIni,minIni,offsetIni,playerIni);});
+  hexbin = d3.hexbin().size([chartWidth, chartHeight]).radius(radio)
+  .x(function(d) {return x(d.x);})
+  .y(function(d) {y_temp=d.y;/*.substring(0,d.Y.length-1);*//*console.log(y_temp+"*");*/return y(y_temp);});
+
+  //0-2013 year
+  hexBinsData = hexbin(datafiltrados);
+  //hexBinsData.length
+  hexBinsData.forEach(intensityFunction)
+  console.log("Cargando datos 1 vez, Maximun"+ max)
+
+  svg.selectAll(".hexagon").data(hexBinsData).enter().append("path")
+      .attr("class", "hexagon")
+      .attr("d", hexbin.hexagon())
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    /*.style("fill", "#0000FF")*/
+    .style("fill", function(d) { return color(averageFunction(d,max,false)); });
+    //.style("fill-opacity", function(d) { return opacity(averageFunction(d)); });
+
+
+});
+
+
+
+
+
+
+function reloadData()
+{
+  var minute=parseInt($("#minute").val());
+  var offset=parseInt($("#offset").val());
+  //minute=0;
+  //offset=45;
+  var period=[]
+  for(var i=1; i<=2;i++)
+    if($("#period"+i).is(':checked'))
+        period.push(i.toString());
+
+  //console.log("t0:"+minute+" *off:"+offset);
+  //console.log("period:"+period);
+
+  var player=[];
+
+  if($("#balon").is(':checked'))
+      player.push('0');
+  $('#equipo1- option:selected').each(function(){if($(this).val()!='None') player.push($(this).val().toString()); });
+  $('#equipo2- option:selected').each(function(){if($(this).val()!='None') player.push((parseInt($(this).val())).toString()); });
+
+ //limpiar datos
+   hexBinsData = hexbin(datosvacios);
+  hexagon = svg.selectAll(".hexagon").data(hexBinsData, function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+  hexagon.exit().remove();
+
+
+  //console.log("reload");
+  //console.log("P "+period+"M "+minute+"O "+offset+"P "+player)
+
+
+
+    datafiltrados = dataTotal.filter(function(row){
+    return filtrarData(row,period,minute,offset,player);});
+
+
+  hexBinsData = hexbin(datafiltrados);
+  hexBinsData.forEach(intensityFunction)
+  console.log("Reload datos Maximun"+ max)
+  hexagon = svg.selectAll(".hexagon").data(hexBinsData, function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+
+  //hexagon.exit().remove();
+
+  hexagon.enter().append("path")
+      .attr("class", "hexagon")
+      .attr("d", hexbin.hexagon())
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      .style("fill", function(d) { return color(averageFunction(d,max,true)); });
+}
+
+
+
+   var canvas = document.getElementById('miCanvas');
+      var context = canvas.getContext('2d');
+      var imageObj = new Image();
+
+      imageObj.onload = function() {
+        context.drawImage(imageObj, 10, 10);
+      };
+      imageObj.src = './canvas_verde.png';
+</script>
+</body>
+</html>
+
+
+
